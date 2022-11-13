@@ -31,13 +31,27 @@
   margin: 5px;
 }
 
+.inputs:focus {
+  outline: none;
+  border: 1px solid #4CAF50;
+}
+
+.matrixInputs {
+  width: 80px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin: 5px;
+}
+
 .inputSimbol {
-  width: 50px;
+  width: 40px;
   height: 25px;
   border-radius: 5px;
   border: 1px solid #ccc;
   padding: 2px;
-  margin-left: 80px;
+  margin-left: 20px;
 }
 
 .App-header {
