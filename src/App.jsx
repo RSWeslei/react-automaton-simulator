@@ -10,7 +10,7 @@ const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Automato Finito Deterministico</h1>
+        <h1>Automato Finito Nao Deterministico</h1>
         <div className="form">
           <input type="text" className='inputs' placeholder="Digite a string" />
           <input id='stateInput' type="number" className='inputs' placeholder="Quantidade de estados" />
@@ -47,9 +47,8 @@ function getMatrix () {
   let simbol = document.getElementsByClassName('inputSimbol');
   for (let i = 0; i < inputs.length; i++) {
     let input = inputs[i]?.value;
-    if (input !== '' && input.trim()) {
-      matrix.push(input);
-    }
+    input = input?.replace (/[^\d]/g, '');
+    matrix.push(input);
   }
   for (let i = 0; i < simbol.length; i++) {
     let input = simbol[i]?.value;
@@ -57,11 +56,40 @@ function getMatrix () {
       simbols.push(input);
     }
   }
-  if (matrix.length !== inputs.length || simbols.length !== simbol.length) {
+  if (simbols.length !== simbol.length) {
     return alert('Preencha todos os campos');
   }
-  console.log(matrix);
-  console.log(simbols);
+  return [matrix, simbols];
+}
+
+function isValidString(alphabet) {
+  let string = document.getElementsByClassName('inputs')[0].value;
+  let matrix = alphabet[0];
+  let simbols = alphabet[1];
+  let fullMatrix = [];
+  let size = matrix.length / simbols.length;
+  for (let i = 0; i < size; i++) {
+    fullMatrix.push(matrix.slice(i * simbols.length, (i + 1) * simbols.length));
+  }
+  let current = fullMatrix[0];
+  for (let i = 0; i < string.length; i++) {
+    let letter = string[i];
+    let finded = false;
+    for (let j = 0; j < current.length; j++) {
+      if ((letter === simbols[j]) && current[j] !== '') {
+        let next = Number(current[j])
+        console.log('current', next);
+        console.log(letter, string[i]);
+        current = fullMatrix[next];
+        finded = true;
+        break;
+      }
+    }
+    if (!finded) {
+      return alert('String invalida');
+    }
+  }
+  return alert('String valida');
 }
 
 function cleanTable() {
@@ -108,7 +136,7 @@ function Table(props) {
           })}
         </tbody>
       </table>
-      <button type="submit" className='verifyBtn' onClick={() => { getMatrix() }}>Verificar</button>
+      <button type="submit" className='verifyBtn' onClick={() => { isValidString(getMatrix()) }}>Verificar</button>
       <button type="submit" className='verifyBtn' style={{backgroundColor:'red'}} onClick={() => { cleanTable() }}>Limpar tabela</button>
     </div>
   )
