@@ -46,12 +46,16 @@
 }
 
 .inputSimbol {
-  width: 40px;
+  width: 50px;
   height: 25px;
   border-radius: 5px;
   border: 1px solid #ccc;
   padding: 2px;
   margin-left: 20px;
+}
+
+.checkbox {
+  margin: 5px;
 }
 
 .App-header {
