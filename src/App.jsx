@@ -47,7 +47,10 @@ function getMatrix () {
   let simbol = document.getElementsByClassName('inputSimbol');
   for (let i = 0; i < inputs.length; i++) {
     let input = inputs[i]?.value;
-    input = input?.replace (/[^\d]/g, '');
+    input = input.split(',')
+    for (let i = 0; i < input.length; i++) {
+      input[i] = input[i].replace (/[^\d]/g, '');
+    }
     matrix.push(input);
   }
   for (let i = 0; i < simbol.length; i++) {
@@ -62,31 +65,133 @@ function getMatrix () {
   return [matrix, simbols];
 }
 
+function determenization(matrix, simbols, isFinalState) {
+  // console.log(matrix);
+  // console.log(simbols);
+  // console.log(isFinalState);
+  let allStates = [];
+
+  const n = Math.pow(2, matrix.length);
+  // generate all states combinations
+  for (let i = 0; i < n; i++) {
+    let state = [];
+    for (let j = 0; j < matrix.length; j++) {
+      if ((i & (1 << j)) > 0) {
+        state.push(j);
+      }
+    }
+    allStates.push(state);
+  }
+  // sort allStates
+  allStates.sort((a, b) => {
+    if (a.length > b.length) {
+      return 1;
+    }
+    if (a.length < b.length) {
+      return -1;
+    }
+    return 0;
+  });
+  console.log(allStates);
+
+  let newMatrix = [];
+
+  // now generate the new matrix
+  for (let i = 0; i < allStates.length; i++) {
+    let state = allStates[i];
+    let newState = [];
+    for (let j = 0; j < simbols.length; j++) {
+      let newStates = [];
+      for (let k = 0; k < state.length; k++) {
+        let index = state[k];
+        let states = matrix[index][j];
+        for (let l = 0; l < states.length; l++) {
+          let state = states[l];
+          if (!newStates.includes(state) && state !== '') {
+            newStates.push(state);
+          }
+        }
+      }
+      newState.push(newStates);
+    }
+    newMatrix.push(newState);
+  }
+  // console.log(newMatrix);
+
+  let newStates = [];
+  for (let i = 0; i < newMatrix.length; i++) {
+    let state = []
+    for (let j = 0; j < newMatrix[i].length; j++) {
+      for (let k = 0; k < allStates.length; k++) {
+        if (newMatrix[i][j].toString() === allStates[k].toString()) {
+          state.push(k);
+          // put the corresponding letter
+          // state.push(String.fromCharCode(65 + k));
+        }
+      }
+    }
+    newStates.push(state);
+  }
+
+  console.log(newStates);
+
+  let newFinalStates = [];
+  for (let i = 0; i < allStates.length; i++) {
+    let state = allStates[i];
+    let isFinal = false;
+    for (let j = 0; j < state.length; j++) {
+      let index = state[j];
+      if (isFinalState[index]) {
+        isFinal = true;
+        break;
+      }
+    }
+    newFinalStates.push(isFinal);
+  }
+  console.log(newFinalStates);
+
+
+
+  return [newStates, newFinalStates];
+}
+
 function isValidString(alphabet) {
   let string = document.getElementsByClassName('inputs')[0].value;
   let isFinalState = [];
   let matrix = alphabet[0];
   let simbols = alphabet[1];
+
   let fullMatrix = [];
   let size = matrix.length / simbols.length;
+
   for (let i = 0; i < size; i++) {
     fullMatrix.push(matrix.slice(i * simbols.length, (i + 1) * simbols.length));
   }
-
+  
   let checkboxes = document.getElementsByClassName('checkbox');
   for (let i = 0; i < checkboxes.length; i++) {
     isFinalState.push(checkboxes[i].checked);
   }
+  
+  [fullMatrix, isFinalState] = determenization(fullMatrix, simbols, isFinalState);
 
-  let history = [];
+  // remove the first state
+  // fullMatrix.shift();
+  // isFinalState.shift();
+
   console.log(fullMatrix);
   console.log(isFinalState);
-  let current = fullMatrix[0];
+
+
+  let history = [];
+  // console.log(fullMatrix);
+  // console.log(isFinalState);
+  let current = fullMatrix[1];
  
   let last;
   for (let i = 0; i < string.length; i++) {
     let letter = string[i];
-    console.log("Letter: ", letter);
+    // console.log("Letter: ", letter);
     let finded = false;
     for (let j = 0; j < current.length; j++) {
       if ((letter === simbols[j]) && current[j] !== '') {
@@ -96,8 +201,8 @@ function isValidString(alphabet) {
           to: 'q' + current[j]
         });
         let next = Number(current[j])
-        console.log("Founded: ", current);
-        console.log('Next', next);
+        // console.log("Founded: ", current);
+        // console.log('Next', next);
         current = fullMatrix[next];
         finded = true;
         last = next;
@@ -110,7 +215,7 @@ function isValidString(alphabet) {
     }
   }
   console.log("History", history);
-  console.log("Last: ", last);
+  // console.log("Last: ", last);
   if (!isFinalState[last]) {
     return alert('String invalida por nao ser final');
   }
