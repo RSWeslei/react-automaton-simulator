@@ -34,6 +34,7 @@ const App = () => {
     </div>
   );
 }
+//
 function getValues() {
   let stateInput = document.getElementById('stateInput');
   let alphabetInput = document.getElementById('alphabetInput');
@@ -65,14 +66,12 @@ function getMatrix () {
   return [matrix, simbols];
 }
 
-function determenization(matrix, simbols, isFinalState) {
-  // console.log(matrix);
-  // console.log(simbols);
-  // console.log(isFinalState);
+// Função que determiniza o automato
+function determenizar(matrix, simbols, isFinalState) {
   let allStates = [];
-
   const n = Math.pow(2, matrix.length);
-  // generate all states combinations
+
+  // Aqui é criado um array com todos os estados possiveis
   for (let i = 0; i < n; i++) {
     let state = [];
     for (let j = 0; j < matrix.length; j++) {
@@ -82,7 +81,8 @@ function determenization(matrix, simbols, isFinalState) {
     }
     allStates.push(state);
   }
-  // sort allStates
+
+  // Ordena o array de estados
   allStates.sort((a, b) => {
     if (a.length > b.length) {
       return 1;
@@ -92,11 +92,9 @@ function determenization(matrix, simbols, isFinalState) {
     }
     return 0;
   });
-  console.log(allStates);
 
   let newMatrix = [];
-
-  // now generate the new matrix
+  // Cria a nova matriz co
   for (let i = 0; i < allStates.length; i++) {
     let state = allStates[i];
     let newState = [];
@@ -116,7 +114,6 @@ function determenization(matrix, simbols, isFinalState) {
     }
     newMatrix.push(newState);
   }
-  // console.log(newMatrix);
 
   let newStates = [];
   for (let i = 0; i < newMatrix.length; i++) {
@@ -125,17 +122,13 @@ function determenization(matrix, simbols, isFinalState) {
       for (let k = 0; k < allStates.length; k++) {
         if (newMatrix[i][j].toString() === allStates[k].toString()) {
           state.push(k);
-          // put the corresponding letter
-          // state.push(String.fromCharCode(65 + k));
         }
       }
     }
     newStates.push(state);
   }
 
-  console.log(newStates);
-
-  let newFinalStates = [];
+  let finalStates = [];
   for (let i = 0; i < allStates.length; i++) {
     let state = allStates[i];
     let isFinal = false;
@@ -146,15 +139,12 @@ function determenization(matrix, simbols, isFinalState) {
         break;
       }
     }
-    newFinalStates.push(isFinal);
+    finalStates.push(isFinal);
   }
-  console.log(newFinalStates);
-
-
-
-  return [newStates, newFinalStates];
+  return [newStates, finalStates];
 }
 
+// Função que verifica se a string é aceita pelo automato
 function isValidString(alphabet) {
   let string = document.getElementsByClassName('inputs')[0].value;
   let isFinalState = [];
@@ -173,25 +163,14 @@ function isValidString(alphabet) {
     isFinalState.push(checkboxes[i].checked);
   }
   
-  [fullMatrix, isFinalState] = determenization(fullMatrix, simbols, isFinalState);
+  [fullMatrix, isFinalState] = determenizar(fullMatrix, simbols, isFinalState);
 
-  // remove the first state
-  // fullMatrix.shift();
-  // isFinalState.shift();
-
-  console.log(fullMatrix);
-  console.log(isFinalState);
-
-
-  let history = [];
-  // console.log(fullMatrix);
-  // console.log(isFinalState);
+  let history = []; // Array que guarda o histórico de estados e transições
   let current = fullMatrix[1];
  
   let last;
   for (let i = 0; i < string.length; i++) {
     let letter = string[i];
-    // console.log("Letter: ", letter);
     let finded = false;
     for (let j = 0; j < current.length; j++) {
       if ((letter === simbols[j]) && current[j] !== '') {
@@ -201,8 +180,6 @@ function isValidString(alphabet) {
           to: 'q' + current[j]
         });
         let next = Number(current[j])
-        // console.log("Founded: ", current);
-        // console.log('Next', next);
         current = fullMatrix[next];
         finded = true;
         last = next;
@@ -215,13 +192,13 @@ function isValidString(alphabet) {
     }
   }
   console.log("History", history);
-  // console.log("Last: ", last);
   if (!isFinalState[last]) {
     return alert('String invalida por nao ser final');
   }
   return alert('String valida');
 }
 
+// Função que limpa os inputs
 function cleanTable() {
   let inputs = document.getElementsByClassName('matrixInputs');
   for (let i = 0; i < inputs.length; i++) {
@@ -237,6 +214,7 @@ function cleanTable() {
   }
 }
 
+// Função que cria a tabela
 function Table(props) {
   if (props.statesLenght === 0 || props.alphabetLenght === 0) {
     return null;
