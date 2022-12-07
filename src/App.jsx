@@ -17,7 +17,7 @@ const App = () => {
           <div className="form">
             <div className='form-content'>
               <label>String que você pretente validar</label>
-              <input type="text" className='inputs' placeholder="Digite a string" />
+              <input type="text" className='inputs' id='stringInput' placeholder="Digite a string" />
               <label>Quantidade total de estados</label>
               <input id='stateInput' type="number" className='inputs' placeholder="Quantidade de estados" />
               <label>Quantidade total do alfabeto</label>
@@ -56,37 +56,65 @@ function getValues() {
   return [stateInput.value, alphabetInput.value];
 }
 
-function getMatrix () {
+function getMatriz () 
+{
   let matrix = [];
   let simbols = [];
+  let finalStates = [];
   let inputs = document.getElementsByClassName('matrixInputs');
-  let simbol = document.getElementsByClassName('inputSimbol');
+  let alphabet = document.getElementsByClassName('inputSimbol');
+
+  // Pega os valores da matriz, e os trata
   for (let i = 0; i < inputs.length; i++) {
     let input = inputs[i]?.value;
     input = input.split(',')
     for (let i = 0; i < input.length; i++) {
       input[i] = input[i].replace (/[^\d]/g, '');
     }
+    input = input.sort((a, b) => {  
+      if (a > b) {
+        return 1;
+      }
+      if (a < b) {
+        return -1;
+      }
+      return 0;
+    });
     matrix.push(input);
   }
-  for (let i = 0; i < simbol.length; i++) {
-    let input = simbol[i]?.value;
+
+  for (let i = 0; i < alphabet.length; i++) {
+    let input = alphabet[i]?.value;
     if (input !== '' && input.trim()) {
       simbols.push(input);
     }
   }
-  if (simbols.length !== simbol.length) {
+
+  if (simbols.length !== alphabet.length) {
     return alert('Preencha todos os campos');
   }
-  return [matrix, simbols];
+
+  let fullMatrix = [];
+  const size = matrix.length / simbols.length;
+
+  for (let i = 0; i < size; i++) { 
+    fullMatrix.push(matrix.slice(i * simbols.length, (i + 1) * simbols.length));
+  }
+
+  let checkboxes = document.getElementsByClassName('checkbox');
+    for (let i = 0; i < checkboxes.length; i++) {
+      finalStates.push(checkboxes[i].checked);
+    }
+
+  return [fullMatrix, simbols, finalStates];
 }
 
-// Fun��o que determiniza o automato
+// Funcao que determiniza o automato
 function determenizar(matrix, simbols, isFinalState) {
   let allStates = [];
   const n = Math.pow(2, matrix.length);
 
-  // Aqui � criado um array com todos os estados possiveis
+  // Aqui e criado um array com todos os estados possiveis
   for (let i = 0; i < n; i++) {
     let state = [];
     for (let j = 0; j < matrix.length; j++) {
@@ -109,7 +137,7 @@ function determenizar(matrix, simbols, isFinalState) {
   });
 
   let newMatrix = [];
-  // Cria a nova matriz co
+  // Cria a nova matriz de estados
   for (let i = 0; i < allStates.length; i++) {
     let state = allStates[i];
     let newState = [];
@@ -130,6 +158,8 @@ function determenizar(matrix, simbols, isFinalState) {
     newMatrix.push(newState);
   }
 
+  console.log("Matriz antiga: ", matrix);
+
   let newStates = [];
   for (let i = 0; i < newMatrix.length; i++) {
     let state = []
@@ -142,6 +172,8 @@ function determenizar(matrix, simbols, isFinalState) {
     }
     newStates.push(state);
   }
+
+  console.log("Matriz nova: ", newStates);
 
   let finalStates = [];
   for (let i = 0; i < allStates.length; i++) {
@@ -156,46 +188,57 @@ function determenizar(matrix, simbols, isFinalState) {
     }
     finalStates.push(isFinal);
   }
+
   return [newStates, finalStates];
 }
 
-// Fun��o que verifica se a string � aceita pelo automato
+function isDeterministic(matrix) {
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < matrix[i].length; j++) {
+      if (matrix[i][j].length > 1) {
+        console.log('Nao deterministico');
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+// Funcao que verifica se a string e aceita pelo automato
 function isValidString(alphabet) {
-  let string = document.getElementsByClassName('inputs')[0].value;
-  let isFinalState = [];
+  let string = document.getElementById('stringInput').value;
   let matrix = alphabet[0];
   let simbols = alphabet[1];
+  let finalStates = alphabet[2];
 
-  let fullMatrix = [];
-  let size = matrix.length / simbols.length;
+  let currentState;
 
-  for (let i = 0; i < size; i++) {
-    fullMatrix.push(matrix.slice(i * simbols.length, (i + 1) * simbols.length));
+  // console.log(matrix);
+
+  if (!isDeterministic(matrix)) {
+    [matrix, finalStates] = determenizar(matrix, simbols, alphabet[2]);
+    currentState = matrix[1];
+  } else {
+    currentState = matrix[0];
   }
-  
-  let checkboxes = document.getElementsByClassName('checkbox');
-  for (let i = 0; i < checkboxes.length; i++) {
-    isFinalState.push(checkboxes[i].checked);
-  }
-  
-  [fullMatrix, isFinalState] = determenizar(fullMatrix, simbols, isFinalState);
 
-  let history = []; // Array que guarda o hist�rico de estados e transi��es
-  let current = fullMatrix[1];
+  // console.log(matrix);
+
+  let history = []; // Array que guarda o historico de estados e transicoes
  
   let last;
   for (let i = 0; i < string.length; i++) {
     let letter = string[i];
     let finded = false;
-    for (let j = 0; j < current.length; j++) {
-      if ((letter === simbols[j]) && current[j] !== '') {
+    for (let j = 0; j < currentState.length; j++) {
+      if ((letter === simbols[j]) && currentState[j] !== '') {
         history.push({
           letter: `${string.slice(0, i)}[${letter}]${string.slice(i+1, string.length)}`,
-          from: 'q' + fullMatrix.indexOf(current),
-          to: 'q' + current[j]
+          from: 'q' + matrix.indexOf(currentState),
+          to: 'q' + currentState[j]
         });
-        let next = Number(current[j])
-        current = fullMatrix[next];
+        let next = Number(currentState[j])
+        currentState = matrix[next];
         finded = true;
         last = next;
         break;
@@ -207,13 +250,13 @@ function isValidString(alphabet) {
     }
   }
   console.log("History", history);
-  if (!isFinalState[last]) {
-    return alert('String invalida por nao ser final');
+  if (!finalStates[last]) {
+    return alert('String invalida');
   }
   return alert('String valida');
 }
 
-// Fun��o que limpa os inputs
+// Funcao que limpa os inputs
 function cleanTable() {
   let inputs = document.getElementsByClassName('matrixInputs');
   for (let i = 0; i < inputs.length; i++) {
@@ -229,19 +272,13 @@ function cleanTable() {
   }
 }
 
-// Fun��o que cria a tabela
+// Funcao que cria a tabela
 function Table(props) {
   if (props.statesLenght === 0 || props.alphabetLenght === 0) {
     return null;
   }
-  let states = [];
-  for (let i = 0; i < props.statesLenght; i++) {
-    states.push(i);
-  }
-  let alphabet = [];
-  for (let i = 0; i < props.alphabetLenght; i++) {
-    alphabet.push(i);
-  }
+  let states = Array.from(Array(Number(props.statesLenght)).keys()) // Cria de 0 ... n-1, sendo n o numero de estados
+  let alphabet = Array.from(Array(Number(props.alphabetLenght)).keys()) // Cria de 0 ... n-1, sendo n o numero de simbolos
   return (
     <div>
       <table >
@@ -271,7 +308,7 @@ function Table(props) {
           })}
         </tbody>
       </table>
-      <button type="submit" className='verifyBtn' onClick={() => { isValidString(getMatrix()) }}>Verificar</button>
+      <button type="submit" className='verifyBtn' onClick={() => { isValidString(getMatriz()) }}>Verificar</button>
       <button type="submit" className='verifyBtn' style={{backgroundColor:'red'}} onClick={() => { cleanTable() }}>Limpar tabela</button>
     </div>
   )
