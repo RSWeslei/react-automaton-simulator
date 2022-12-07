@@ -9,28 +9,43 @@ const App = () => {
   });
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Automato Finito Nao Deterministico</h1>
-        <div className="form">
-          <input type="text" className='inputs' placeholder="Digite a string" />
-          <input id='stateInput' type="number" className='inputs' placeholder="Quantidade de estados" />
-          <input id='alphabetInput' type="number" className='inputs' placeholder="Tamanho do alfabeto" />
-          <button
-            className='verifyBtn'
-            type="submit"
-            onClick={() => { 
-              let values = getValues();
-              setState({
-                createTable: true,
-                statesLenght: values[0],
-                alphabetLenght: values[1]
-              })
-            }}
-          >Gerar Tabela</button>
-          {state.createTable ? <Table statesLenght={state.statesLenght} alphabetLenght={state.alphabetLenght} /> : null}
+      <div className="body">
+        <div className='header-content'>
+          <h2 className='title-header'>Automato Finito NÃ£o Deterministico</h2>
         </div>
-      </header>
-      
+        <div className='content'>
+          <div className="form">
+            <div className='form-content'>
+              <label>String que vocÃª pretente validar</label>
+              <input type="text" className='inputs' placeholder="Digite a string" />
+              <label>Quantidade total de estados</label>
+              <input id='stateInput' type="number" className='inputs' placeholder="Quantidade de estados" />
+              <label>Quantidade total do alfabeto</label>
+              <input id='alphabetInput' type="number" className='inputs' placeholder="Tamanho do alfabeto" />
+            </div>
+            <button
+              className='verifyBtn'
+              type="submit"
+              onClick={() => { 
+                let values = getValues();
+                setState({
+                  createTable: true,
+                  statesLenght: values[0],
+                  alphabetLenght: values[1]
+                })
+              }}
+            >
+              Gerar Tabela
+            </button>
+          </div>
+            {state.createTable  
+              ? <div className='table'>
+                <Table statesLenght={state.statesLenght} alphabetLenght={state.alphabetLenght} />
+              </div> 
+              : null
+            }
+        </div>
+      </div>
     </div>
   );
 }
@@ -66,12 +81,12 @@ function getMatrix () {
   return [matrix, simbols];
 }
 
-// Função que determiniza o automato
+// Funï¿½ï¿½o que determiniza o automato
 function determenizar(matrix, simbols, isFinalState) {
   let allStates = [];
   const n = Math.pow(2, matrix.length);
 
-  // Aqui é criado um array com todos os estados possiveis
+  // Aqui ï¿½ criado um array com todos os estados possiveis
   for (let i = 0; i < n; i++) {
     let state = [];
     for (let j = 0; j < matrix.length; j++) {
@@ -144,7 +159,7 @@ function determenizar(matrix, simbols, isFinalState) {
   return [newStates, finalStates];
 }
 
-// Função que verifica se a string é aceita pelo automato
+// Funï¿½ï¿½o que verifica se a string ï¿½ aceita pelo automato
 function isValidString(alphabet) {
   let string = document.getElementsByClassName('inputs')[0].value;
   let isFinalState = [];
@@ -165,7 +180,7 @@ function isValidString(alphabet) {
   
   [fullMatrix, isFinalState] = determenizar(fullMatrix, simbols, isFinalState);
 
-  let history = []; // Array que guarda o histórico de estados e transições
+  let history = []; // Array que guarda o histï¿½rico de estados e transiï¿½ï¿½es
   let current = fullMatrix[1];
  
   let last;
@@ -198,7 +213,7 @@ function isValidString(alphabet) {
   return alert('String valida');
 }
 
-// Função que limpa os inputs
+// Funï¿½ï¿½o que limpa os inputs
 function cleanTable() {
   let inputs = document.getElementsByClassName('matrixInputs');
   for (let i = 0; i < inputs.length; i++) {
@@ -214,7 +229,7 @@ function cleanTable() {
   }
 }
 
-// Função que cria a tabela
+// Funï¿½ï¿½o que cria a tabela
 function Table(props) {
   if (props.statesLenght === 0 || props.alphabetLenght === 0) {
     return null;
@@ -233,9 +248,12 @@ function Table(props) {
         <tbody>
           {states.map((state) => {
             return (
-              <tr key={state}>
-                <input type="checkbox" className='checkbox' />
-                <td style={{fontSize:'20px'}}>{'q' + state}</td>
+              <tr key={state} className="tr-table">
+                <div className='check'>
+                  <label >Estado final</label>
+                  <input type="checkbox" className='checkbox' />
+                  <label style={{fontSize:'19px'}}>{'q' + state}</label>
+                </div>
                 {alphabet.map((letter) => {
                   return (
                     <td key={letter}>
