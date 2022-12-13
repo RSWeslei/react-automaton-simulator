@@ -215,8 +215,6 @@ function isValidString(alphabet) {
 
   let currentState;
 
-  // console.log(matrix);
-
   if (string === '') {
     if(finalStates[0]) {
       return alert('String aceita');
@@ -230,8 +228,6 @@ function isValidString(alphabet) {
   } else {
     currentState = matrix[0];
   }
-
-  // console.log(matrix);
 
   let history = []; // Array que guarda o historico de estados e transicoes
  
