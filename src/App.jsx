@@ -49,13 +49,14 @@ const App = () => {
     </div>
   );
 }
-//
+// Essa funcao pega os valores dos inputs e retorna um array com eles
 function getValues() {
   let stateInput = document.getElementById('stateInput');
   let alphabetInput = document.getElementById('alphabetInput');
   return [stateInput.value, alphabetInput.value];
 }
 
+// Retorna um array com os valores da matriz para fazer a logica
 function getMatriz () 
 {
   let matrix = [];
@@ -110,7 +111,7 @@ function getMatriz ()
 }
 
 // Funcao que determiniza o automato
-function determenizar(matrix, simbols, isFinalState) {
+function determinization(matrix, simbols, isFinalState) {
   let allStates = [];
   const n = Math.pow(2, matrix.length);
 
@@ -192,6 +193,7 @@ function determenizar(matrix, simbols, isFinalState) {
   return [newStates, finalStates];
 }
 
+// Funcao que verifica se o automato é deterministico
 function isDeterministic(matrix) {
   for (let i = 0; i < matrix.length; i++) {
     for (let j = 0; j < matrix[i].length; j++) {
@@ -215,8 +217,15 @@ function isValidString(alphabet) {
 
   // console.log(matrix);
 
+  if (string === '') {
+    if(finalStates[0]) {
+      return alert('String aceita');
+    } 
+    return alert('String nao aceita');
+  }
+
   if (!isDeterministic(matrix)) {
-    [matrix, finalStates] = determenizar(matrix, simbols, alphabet[2]);
+    [matrix, finalStates] = determinization(matrix, simbols, alphabet[2]);
     currentState = matrix[1];
   } else {
     currentState = matrix[0];
@@ -246,12 +255,12 @@ function isValidString(alphabet) {
     }
     if (!finded) {
       console.log("History", history);
-      return alert('String invalida');
+      return alert('String nao aceita');
     }
   }
   console.log("History", history);
   if (!finalStates[last]) {
-    return alert('String invalida');
+    return alert('String nao aceita');
   }
   return alert('String valida');
 }
